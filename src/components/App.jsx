@@ -46,7 +46,7 @@ export class App extends Component {
   }
 
   onSubmit = query => {
-    this.setState({ query, images: [] });
+    this.setState({ query, images: [], showBtn: false });
   };
 
   handleClickMore = () => {
