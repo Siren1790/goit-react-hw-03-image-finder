@@ -1,15 +1,87 @@
 import React, { Component } from 'react';
-import { SearchBar } from "./index"
-// const Api_Key = "32586703-3cda94dac50b012465c4c9243";
-// const BASE_URL = "https://pixabay.com/api/";
+import {
+  SearchBar,
+  getImages,
+  Gallery,
+  ButtonStyled,
+  Loader,
+  Modal,
+} from './index';
 
 export class App extends Component {
-  
-  render(){
+  state = {
+    query: '',
+    page: 1,
+    images: [],
+    isLOading: false,
+    isEmpty: false,
+    showBtn: false,
+    error: '',
+    openModal: false,
+    largeImg: '',
+  };
 
+  componentDidUpdate(prevProps, prevState) {
+    const { query, page } = this.state;
+    if (query !== prevState.query || page !== prevState.page) {
+      this.setState({ isLOading: true });
+      getImages(query, page)
+        .then(({ hits, totalHits }) => {
+          if (!hits.length) {
+            this.state({ isEmpty: true });
+            return;
+          }
+          this.setState(prevState => ({
+            images: [...prevState.images, ...hits],
+            showBtn: page < Math.ceil(totalHits / 12),
+          }));
+        })
+        .catch(error => {
+          this.setState({
+            error: error.message,
+          });
+        })
+        .finally(this.setState({ isLOading: false }));
+    }
+  }
+
+  onSubmit = query => {
+    this.setState({ query, images: [] });
+  };
+
+  handleClickMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
+  };
+
+  onClickImg = e => {
+    this.setState({
+      largeImg: e.target.name,
+      openModal: true,
+    });
+  };
+
+  closeModal = () => {
+    this.setState({
+      openModal: false,
+    });
+  };
+  render() {
     return (
-      <SearchBar />
+      <>
+        <SearchBar onSubmit={this.onSubmit} />
+        <Gallery images={this.state.images} onClick={this.onClickImg} />
+        {this.state.showBtn && <ButtonStyled onClick={this.handleClickMore} />}
+        {this.state.isLOading && <Loader />}
+        {this.state.openModal && (
+          <Modal
+            selectedImage={this.state.largeImg}
+            // tags={alt}
+            onClose={this.closeModal}
+          />
+        )}
+      </>
     );
   }
-  
-};
+}

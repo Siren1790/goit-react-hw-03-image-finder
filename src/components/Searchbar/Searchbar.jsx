@@ -6,7 +6,8 @@ export class SearchBar extends Component {
   };
   submitForm = (event) => {
     event.preventDefault();
-    console.log('Submit');
+    this.props.onSubmit(this.state.value);
+
     this.setState({
         value: '',
     })
@@ -14,8 +15,9 @@ export class SearchBar extends Component {
   changeInput = (event) => {
     let input = event.currentTarget.value;
     this.setState({
-        value: input,
-    });
+      value: input,
+  });
+
   }
   render() {
     return (
@@ -35,6 +37,7 @@ export class SearchBar extends Component {
           />
         </SearchForm>
       </SearchbarHeader>
+      
     );
   }
 }
